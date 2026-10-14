@@ -356,6 +356,7 @@ impl<H: Handshake + Clone, S: event::Subscriber + Clone> Start<'_, H, S> {
             self.server.local_addr = socket.local_addr()?;
         }
 
+        // SAFETY: `socket` is owned by the AsyncFd, so its fd is stable until drop.
         let socket = unsafe { tokio::io::unix::AsyncFd::register(socket) }?;
         let id = self.id();
 

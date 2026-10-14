@@ -69,6 +69,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // Continuously drain the eBPF trace logs to the configured logger.
     if let Some(logger) = logger {
+        // SAFETY: the logger owns its ring buffer fd until drop.
         let mut logger = unsafe {
             tokio::io::unix::AsyncFd::register_with_interest(logger, tokio::io::Interest::READABLE)
         }?;

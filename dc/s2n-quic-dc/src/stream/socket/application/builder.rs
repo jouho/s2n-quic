@@ -27,6 +27,7 @@ mod tokio_impl {
     impl<T: udp::Socket> Builder for TokioUdpSocket<T> {
         #[inline]
         fn build(self: Box<Self>) -> io::Result<ArcApplication> {
+            // SAFETY: callers pass a socket that owns its fd, so it is stable until drop.
             let v = unsafe { AsyncFd::register(self.0) }?;
             let v = application::Single(v);
             let v = Arc::new(v);
@@ -42,8 +43,10 @@ mod tokio_impl {
     impl Builder for UdpPair {
         #[inline]
         fn build(self: Box<Self>) -> io::Result<ArcApplication> {
+            // SAFETY: the Arc keeps the socket alive, so its fd is stable until drop.
             let read = unsafe { AsyncFd::register(self.reader) }?;
             let read = Tracing(read);
+            // SAFETY: the Arc keeps the socket alive, so its fd is stable until drop.
             let write = unsafe { AsyncFd::register(self.writer) }?;
             let write = Tracing(write);
             let v = application::Pair { read, write };

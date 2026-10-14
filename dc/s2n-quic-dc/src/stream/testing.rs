@@ -846,6 +846,7 @@ pub mod server {
                     Protocol::Tcp => {
                         let socket = options.build_tcp_listener().unwrap();
                         let local_addr = socket.local_addr().unwrap();
+                        // SAFETY: `socket` is owned by the AsyncFd, so its fd is stable until drop.
                         let socket =
                             unsafe { ::tokio::io::unix::AsyncFd::register(socket) }.unwrap();
                         let channel_behavior =
@@ -876,6 +877,7 @@ pub mod server {
                         let socket = options.build_udp().unwrap();
                         let local_addr = socket.local_addr().unwrap();
 
+                        // SAFETY: `socket` is owned by the AsyncFd, so its fd is stable until drop.
                         let socket =
                             unsafe { ::tokio::io::unix::AsyncFd::register(socket) }.unwrap();
 
